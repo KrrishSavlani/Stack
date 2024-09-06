@@ -1,78 +1,109 @@
-//this program is just an basic program which can just solve the simple expression where there is only single operator 
-//todo :- convert it in dynamic after setting the rules for the operator in the stack 
-// to do 1) :- set the rules 
-//       2) :- make it dynamic
-
 import java.util.*;
 
-public class expression
-{
-	
-	static StringBuffer o1 = new StringBuffer("+");
-	static StringBuffer o2 = new StringBuffer("-");
-	static StringBuffer o3 = new StringBuffer("/");
-	static StringBuffer o4 = new StringBuffer("*");
-	static StringBuffer o5 = new StringBuffer("^");
+public class expression {
+    static Set<String> operators = new HashSet<>();
     static StringBuffer prefix = new StringBuffer();
-	
-    public static void process(StringBuffer exp)
-	{
-		stack stackk = new stack();
-	  for(int i = 0 ; i<exp.length() ; i++)
-	  {
-		     //conert char to stringBUffer
-			 
-		StringBuffer ch = new StringBuffer(String.valueOf(exp.charAt(i)));
-		   //string.valueof(exp.charAt(0)) coverting to the string  and then converted into StringBuffer
-		if(ch.toString().equals(o1.toString()) || ch.toString().equals(o2.toString()) || ch.toString().equals(o3.toString()) || ch.toString().equals(o4.toString()) || ch.toString().equals(o5.toString())
-		  )
-		{
-			//add this to stack
-			stackk.push(ch);
-		}
-		else
-		{
-			 prefix.append(ch);
-		}
-	  }
-	}
-	
-	public static void getResult()
-	{
-		stack obj = new stack();
-		
-		while(obj.top > -1)
-		{
-			prefix.append(obj.pop());
-		}
-		
-		System.out.println("prefix :- " +prefix);
-		
-	}
-  
-    public static void main(String[] args)
-    {
-       System.out.println("infix : a^b");
-       StringBuffer exp = new StringBuffer("a^b");
-       expression obj = new expression();
-	   obj.process(exp);
-	   obj.getResult();
-	   
+
+    static {
+        operators.add("+");
+        operators.add("-");
+        operators.add("/");
+        operators.add("*");
+        operators.add("^");
+        operators.add("(");
+        operators.add(")");
+        operators.add("{");
+        operators.add("}");
+        operators.add("[");
+        operators.add("]");
+    }
+
+    public static void main(String[] args) {
+		Scanner scan = new Scanner(System.in);
+		String input = scan.nextLine();
+        System.out.println("infix : "+input);
+        StringBuffer exp = new StringBuffer(input);
+        expression obj = new expression();
+        obj.process(exp);
+        obj.getResult();
+    }
+
+    public static void process(StringBuffer exp) {
+        stack stackk = new stack();
+        for (int i = 0; i < exp.length(); i++) {
+            String ch = String.valueOf(exp.charAt(i)); // Convert char to String
+
+            if (operators.contains(ch)) { // Use Set<String> to check if it's an operator
+               // System.out.println("i entered");
+
+                order obj = new order();
+                String last = ch;
+
+                String s_last;
+                do {
+                    if (stackk.top() > -1) {
+                        s_last = stackk.stack[stackk.top()].toString();
+                    }
+                    if (stackk.top() == -1 || obj.GETorder(new StringBuffer(last)) > obj.GETorder(stackk.stack[stackk.top()])) {
+                     //   System.out.println("i entered in pushing if");
+
+					   stackk.push(new StringBuffer(ch));
+					   break;
+                    }
+					else if (obj.GETorder(new StringBuffer(last)) <= obj.GETorder(stackk.stack[stackk.top()])) {
+						// System.out.println("i entered in else");
+
+                        prefix = prefix.append(stackk.pop());
+                    }
+                } while (stackk.top() > -1 );
+				if(stackk.top() == -1) stackk.push(new StringBuffer(last));
+            } else {
+                prefix.append(ch); // Append non-operator directly
+            }
+        }
+    }
+
+    public static void getResult() {
+        stack obj = new stack();
+
+        while (obj.top() > -1) {
+			 //System.out.println("i entered");
+
+            prefix.append(obj.pop());
+        }
+
+        System.out.println("prefix :- " + prefix);
     }
 }
 
-class stack{
-	
-    static StringBuffer [] stack = new StringBuffer[2];
-	static int top = -1;
-	
-	public static void push(StringBuffer op)
-	{
-		stack[++top] = op;
-	}
-	
-	public static StringBuffer pop()
-	{
-		return stack[top--] ;
-	}
+class stack {
+    static StringBuffer[] stack = new StringBuffer[100000];
+    static int top = -1;
+
+    public static int top() {
+        return top;
+    }
+
+    public static void push(StringBuffer op) {
+        stack[++top] = op;
+    }
+
+    public static StringBuffer pop() {
+        return stack[top--];
+    }
+}
+
+class order {
+    public static int GETorder(StringBuffer operator) {
+        return switch (operator.toString()) {
+            case "(", ")", "{", "}", "[", "]" -> 4;
+            case "^" -> 3;
+            case "*", "/" -> 2;
+            case "+", "-" -> 1;
+            default -> {
+                System.out.println("Unknown operator: " + operator);
+                yield -1;
+            }
+        };
+    }
 }
