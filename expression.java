@@ -19,6 +19,7 @@ public class expression {
     }
 
     public static void main(String[] args) {
+   System.out.print("Enter Expression :- ");
 		Scanner scan = new Scanner(System.in);
 		String input = scan.nextLine();
         System.out.println("infix : "+input);
@@ -72,7 +73,7 @@ public class expression {
             prefix.append(obj.pop());
         }
 
-        System.out.println("prefix :- " + prefix);
+        System.out.println("postfix :- " + prefix);
     }
 }
 
